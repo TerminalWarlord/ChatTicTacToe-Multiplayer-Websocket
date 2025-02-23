@@ -2,7 +2,8 @@ import Board from "@/components/board/board";
 import ChatBox from "@/components/chat/chat-box";
 import ScoreBoard from "@/components/score/score-board";
 
-export default function Home() {
+export default async function GamePage({ params }: { params: Promise<{ gameId: string }> }) {
+  const gameId = (await params).gameId;
   return (
     <div className="w-screen bg-white ">
       <div className="flex justify-center">
@@ -10,13 +11,13 @@ export default function Home() {
           {/* left */}
           <div className="w-full  px-5 md:px-0 md:w-2/3">
             {/* <div className="w-full h-20 bg-gray-400">SCORE</div> */}
-            <ScoreBoard/>
-            <Board />
+            <ScoreBoard />
+            <Board gameId={gameId} />
           </div>
           {/* right */}
           {/* <div className="bg-gray-600 w-1/3">CHAT</div>
           <Cha */}
-          <ChatBox/>
+          <ChatBox />
         </div>
       </div>
 
