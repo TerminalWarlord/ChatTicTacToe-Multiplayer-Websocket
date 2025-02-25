@@ -14,7 +14,7 @@ interface gameDetails {
     finished: boolean
 }
 
-const games: gameDetails[] = [];
+let games: gameDetails[] = [];
 
 ws.on("connection", (socket, req) => {
 
@@ -59,7 +59,7 @@ ws.on("connection", (socket, req) => {
 
         }
         else if (parsedData.type === "move") {
-            const { symbol, row, col, gameId }: { symbol: string, row: number, col: number, gameId: string } = parsedData;
+            const { symbol, row, col, gameId, playerId }: { symbol: string, row: number, col: number, gameId: string, playerId: string } = parsedData;
             const game = games.find(u => u.id === gameId);
             if (!game?.state || row === undefined || col === undefined) {
                 return;
@@ -80,12 +80,49 @@ ws.on("connection", (socket, req) => {
             }
             game.ws.map(sc => {
                 sc.send(JSON.stringify({
+                    playerId,
                     symbol,
                     type: "move",
                     state: game.state,
                     winner: isWinner,
                 }));
+                if(isWinner){
+                    sc.close();
+                }
             })
+            if (game.finished) {
+                games = games.filter(g => g !== game);
+            }
         }
+
+        else if(parsedData.type === "chat"){
+            const {message, playerId, gameId} = parsedData;
+
+
+            const game = games.find(g=>g.id===gameId);
+
+            if(!game){
+                return;
+            }
+            console.log(message);
+            game.ws.map(sc=>{
+                sc.send(JSON.stringify({
+                    gameId,
+                    playerId,
+                    message,
+                    id: crypto.randomUUID(),
+                    type :"chat",
+                }));
+            })
+
+
+        }
+
+        
     })
+
+    socket.on("close", ()=>{
+        console.log("Disconnecting");
+    })
+    
 })
