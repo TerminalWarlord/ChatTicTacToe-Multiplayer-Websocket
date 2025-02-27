@@ -37,14 +37,6 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{secrets.USER}}@${{secrets.SSH_HOST}} << 'EOF'
             mkdir -p ~/${{secrets.DIRECTORY}}
             cd ~/${{secrets.DIRECTORY}}
-              
-              
-            # Pull latest code
-            if [ -d ".git" ]; then
-              git pull origin main
-            else
-              git clone https://github.com/${{ github.repository }} . --depth=1
-            fi
 
             docker stop tic-tac-toe-frontend && docker run --rm -p 5001:3000 terminalwarlord/tic-tac-toe-frontend:${{github.sha}}
           EOF
