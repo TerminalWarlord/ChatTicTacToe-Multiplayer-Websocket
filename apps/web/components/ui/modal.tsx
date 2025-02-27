@@ -6,7 +6,6 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from "@/components/ui/dialog"
 import { useImperativeHandle } from "react"
 import { useState } from "react"
@@ -36,24 +35,6 @@ const Modal = forwardRef(({ title, subtitle }: { title: string, subtitle: string
     </Dialog >
 })
 
+Modal.displayName = "Modal";
 
 export default Modal;
-// export function Modal({ title, subTitle, isOpen }: { title: string, subTitle: string, isOpen: boolean }) {
-//     return (
-//         <Dialog open={isOpen}>
-//             <DialogContent className="sm:max-w-[425px]">
-//                 <DialogHeader>
-//                     <DialogTitle>{title}</DialogTitle>
-//                     <DialogDescription>
-//                         {subTitle}
-//                     </DialogDescription>
-//                 </DialogHeader>
-//                 <DialogFooter>
-//                     <form method="dialog">
-//                         <Button>Save changes</Button>
-//                     </form>
-//                 </DialogFooter>
-//             </DialogContent>
-//         </Dialog >
-//     )
-// }

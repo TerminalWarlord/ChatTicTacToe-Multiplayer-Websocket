@@ -23,3 +23,28 @@ export function getWinner(state: string[][]): boolean {
     }
     return false;
 }
+
+export function checkMatchStatus(state: string[][]){
+
+    let count=0;
+
+    state.forEach(row=>{
+        row.forEach(col=>{
+            if(col!=""){
+                count+=1;
+            }
+        })
+    });
+
+
+    return count===9;
+}
+
+
+
+// console.log(isDraw([
+//     ["1","1","0",],
+//     ["1","1","0",],
+//     ["1","1","0",],
+//     // ["","","",],
+// ]))

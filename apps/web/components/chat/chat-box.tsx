@@ -12,13 +12,10 @@ export default function ChatBox({ messages, gameId, playerId }: { messages: Mess
 
     function sendMessage(e: React.FormEvent) {
         e.preventDefault();
-        console.log("CLICKED");
-        if (!inputRef.current) {
-            console.log("NO REF");
+        if (!inputRef.current || inputRef.current.value.trim().length < 1) {
             return;
         }
         if (!msgCtx.socket) {
-            console.log("socket null")
             return;
         }
         console.log("SENDING WS");

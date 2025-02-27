@@ -1,5 +1,5 @@
 import { WebSocket, WebSocketServer } from "ws";
-import { getWinner } from "./utils/helper";
+import { checkMatchStatus, getWinner } from "./utils/helper";
 
 
 const ws = new WebSocketServer({ port: 8080 });
@@ -74,8 +74,11 @@ ws.on("connection", (socket, req) => {
                     game.prevSymbol = symbol;
                 }
             }
+            // Check if match had drawn or has a winner
             const isWinner = getWinner(game.state);
-            if (isWinner) {
+            const isDraw = checkMatchStatus(game.state);
+
+            if (isWinner || isDraw) {
                 game.finished = true;
             }
             game.ws.map(sc => {
@@ -85,44 +88,70 @@ ws.on("connection", (socket, req) => {
                     type: "move",
                     state: game.state,
                     winner: isWinner,
+                    // finished: isWinner || isDraw,
+                    draw: isDraw && !isWinner
                 }));
-                if(isWinner){
-                    sc.close();
-                }
+                // if (isWinner) {
+                //     sc.close();
+                // }
             })
-            if (game.finished) {
-                games = games.filter(g => g !== game);
-            }
+            // if (game.finished) {
+            //     games = games.filter(g => g !== game);
+            // }
         }
 
-        else if(parsedData.type === "chat"){
-            const {message, playerId, gameId} = parsedData;
+        else if (parsedData.type === "chat") {
+            const { message, playerId, gameId } = parsedData;
 
 
-            const game = games.find(g=>g.id===gameId);
+            const game = games.find(g => g.id === gameId);
 
-            if(!game){
+            if (!game) {
                 return;
             }
-            console.log(message);
-            game.ws.map(sc=>{
+            game.ws.map(sc => {
                 sc.send(JSON.stringify({
                     gameId,
                     playerId,
                     message,
                     id: crypto.randomUUID(),
-                    type :"chat",
+                    type: "chat",
                 }));
             })
 
 
         }
 
-        
+        else if (parsedData.type === "close") {
+            console.log("Cleaning up");
+            const { gameId } = parsedData;
+            const game = games.find(g => g.id === gameId);
+            if (!game || !game?.ws) {
+                return;
+            }
+            game.ws = game.ws.filter(soc => soc !== socket);
+            if (game.ws.length == 0) {
+                games = games.filter(g => g.id !== gameId);
+            }
+        }
+
+
     })
 
-    socket.on("close", ()=>{
+    socket.on("close", () => {
         console.log("Disconnecting");
+        const game = games.find(g => g.ws && g.ws.includes(socket));
+        if (!game || !game?.ws) {
+            console.log("not found")
+            return;
+        }
+        console.log("Found socket");
+
+
+        game.ws = game.ws.filter(soc => soc !== socket);
+        if (game.ws.length == 0) {
+            games = games.filter(g => g!==game);
+        }
     })
-    
+
 })

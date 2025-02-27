@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import Modal from "../ui/modal";
 import { useRef } from "react";
 import useSocket from "@/hooks/socket";
@@ -11,9 +11,10 @@ const symbolMap: { "0": string; "X": string } = {
     "X": "/icons/cross.png",
 }
 
-export default function Board({ gameId, playerId }: { gameId: string, playerId: string }) {
-    const modal = useRef(null);
-    const { symbol, errors, gameState, isWinner, socket } = useSocket({ playerId, gameId });
+export default function Board({ gameId, playerId, isMyTurn, updateTurn, symbol, updateSymbol }: { gameId: string, playerId: string, isMyTurn: boolean | undefined, updateTurn: (state: boolean) => void, symbol: string | undefined, updateSymbol: (sym: string) => void }) {
+    const modal = useRef<{ open: () => void; close: () => void } | null>(null);
+    const { errors, gameState, isWinner, socket } = useSocket({ playerId, gameId, isMyTurn, updateTurn, updateSymbol });
+    console.log(isMyTurn);
 
     useEffect(() => {
         function openModal() {
@@ -21,8 +22,6 @@ export default function Board({ gameId, playerId }: { gameId: string, playerId: 
                 console.error("Modal ref is not assigned.");
                 return;
             }
-            // TODO: fix ts
-            // @ts-ignore
             modal.current.open();
         }
 
@@ -34,6 +33,8 @@ export default function Board({ gameId, playerId }: { gameId: string, playerId: 
             openModal();
         }
     }, [errors, isWinner]);
+
+
 
     function pickAGrid(row: number, col: number) {
         socket?.send(JSON.stringify({
@@ -52,9 +53,10 @@ export default function Board({ gameId, playerId }: { gameId: string, playerId: 
             <Modal title={errors.title} subtitle={errors.subtitle} ref={modal} />
         </>}
 
+
         {isWinner.finished && <Modal
-            title={isWinner.won ? "You Won!" : "You Lost!"}
-            subtitle={isWinner.won ? "Congratulations! You have won!" : "Sorry! You have lost!"}
+            title={isWinner.draw ? "Match Draw!" : (isWinner.won ? "You Won!" : "You Lost!")}
+            subtitle={isWinner.draw ? "There was no winner. " : (isWinner.won ? "Congratulations! You have won!" : "Sorry! You have lost!")}
             ref={modal} />
 
         }
@@ -64,7 +66,7 @@ export default function Board({ gameId, playerId }: { gameId: string, playerId: 
                     {arr.map((x, col) => {
                         return <button
                             key={`${row}-${col}`}
-                            className="border-[0.7px] border-opacity-15 border-black w-2/4 aspect-square bg-gray-200 flex justify-center items-center rounded m-0.5 text-3xl text-gray-600"
+                            className="border-[0.7px] border-opacity-15 border-black w-2/4 aspect-square bg-gray-200 flex justify-center items-center rounded m-0.5 text-3xl text-gray-600 disabled:cursor-not-allowed"
                             onClick={() => pickAGrid(row, col)}
                             disabled={gameState[row][col] !== ""}
                         >

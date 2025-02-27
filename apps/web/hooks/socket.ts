@@ -1,6 +1,6 @@
 import { MessageContext } from "@/store/message-context";
 import { Message } from "@/types/types";
-import { useContext, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useContext, useEffect, useState } from "react";
 
 
 const DUMMY_DATA = [
@@ -9,14 +9,30 @@ const DUMMY_DATA = [
     ["", "", ""]
 ]
 
-export default function useSocket({ playerId, gameId }: { playerId: string, gameId: string }) {
+export default function useSocket({ playerId, gameId, isMyTurn, updateTurn, updateSymbol }: {
+    playerId: string, 
+    gameId: string,
+    isMyTurn: boolean | undefined, 
+    updateTurn: (state:boolean)=>void,
+    updateSymbol: (sym: string)=>void
+}) {
     const [gameState, setGameState] = useState(DUMMY_DATA);
     const msgCtx = useContext(MessageContext);
-    const [symbol, setSymbol] = useState();
+    // const [symbol, setSymbol] = useState();
+
     const [errors, setErrors] = useState<{ title: string, subtitle: string } | null>();
-    const [isWinner, setIsWinner] = useState<{ finished: boolean, won?: boolean }>({ finished: false });
+    const [isWinner, setIsWinner] = useState<{ finished: boolean, won?: boolean, draw?: boolean }>({ finished: false });
 
     const ws = msgCtx.socket;
+    console.log(isMyTurn);
+
+    // useEffect(() => {
+        
+    //     if (isMyTurn === undefined) {
+    //         updateTurn(symbol==='0');
+    //     }
+    // }, [symbol]);
+
     useEffect(() => {
         if (!ws) {
             return;
@@ -30,25 +46,41 @@ export default function useSocket({ playerId, gameId }: { playerId: string, game
             }))
         }
 
-        function closeSocket() {
-            if (!ws) {
-                return;
-            }
-            ws.close();
-        }
+        // function closeSocket() {
+        //     if (!ws) {
+        //         return;
+        //     }
+        //     ws.close();
+        // }
 
         ws.onmessage = (ev) => {
             const data = JSON.parse(ev.data);
             if (data.type === 'allocateSymbol') {
                 // console.log("ALLOCATING ", data.symbol);
-                setSymbol(data.symbol);
+                updateSymbol(data.symbol);
+                updateTurn(data.symbol==='0');
                 return;
             }
             else if (data.type === 'move') {
                 setGameState(data.state);
+                if (data.playerId === playerId) {
+                    console.log("should get changed to false");
+                    updateTurn(false);
+                }
+                else {
+                    console.log("should get changed to true");
+
+                    updateTurn(true);
+                }
 
                 // console.log(data.playerId, playerId);
-                if (data.winner && data.playerId === playerId) {
+                if (data.draw) {
+                    setIsWinner({
+                        finished: true,
+                        draw: true,
+                    })
+                }
+                else if (data.winner && data.playerId === playerId) {
                     setIsWinner({
                         finished: true,
                         won: true
@@ -82,12 +114,16 @@ export default function useSocket({ playerId, gameId }: { playerId: string, game
                 return;
 
             }
-            closeSocket();
+            // closeSocket();
         }
 
         return () => {
             if (ws) {
-                ws.close();
+                ws.send(JSON.stringify({
+                    gameId,
+                    type: "close"
+                }))
+                // ws.close();
             }
         };
 
@@ -98,7 +134,6 @@ export default function useSocket({ playerId, gameId }: { playerId: string, game
 
     return {
         gameState,
-        symbol,
         errors,
         isWinner,
         socket: msgCtx.socket

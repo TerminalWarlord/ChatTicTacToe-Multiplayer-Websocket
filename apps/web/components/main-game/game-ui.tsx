@@ -13,8 +13,16 @@ import { Message } from "@/types/types";
 const GameUI: React.FC<{ gameId: string, playerId: string }> = ({ gameId, playerId }) => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [socket, setSocket] = useState<WebSocket | null>(null);
+    const [symbol, setSymbol] = useState<string | undefined>();
+    const [isMyTurn, setIsMyTurn] = useState<boolean | undefined>();
 
+    function handleTurns(state: boolean) {
+        setIsMyTurn(state);
+    }
 
+    function updateSymbol(sym: string) {
+        setSymbol(sym);
+    }
 
     useEffect(() => {
         const ws = new WebSocket("ws://localhost:8080");
@@ -38,8 +46,8 @@ const GameUI: React.FC<{ gameId: string, playerId: string }> = ({ gameId, player
 
         <div className="flex w-full  md:w-3/4 flex-col md:flex-row ">
             <div className="w-full  px-5 md:px-0 md:w-2/3">
-                <ScoreBoard />
-                <Board gameId={gameId} playerId={playerId} />
+                <ScoreBoard isMyTurn={isMyTurn} />
+                <Board gameId={gameId} playerId={playerId} isMyTurn={isMyTurn} updateTurn={handleTurns} symbol={symbol} updateSymbol={updateSymbol} />
             </div>
             <ChatBox gameId={gameId} playerId={playerId} messages={messages} />
         </div>

@@ -1,0 +1,20 @@
+FROM node:23-alpine
+
+WORKDIR /usr/src/app
+
+COPY package.json ./
+
+RUN npm install -g pnpm
+
+COPY . .
+
+# 1.	Filters (--filter or -F) – Specify which packages to build:
+# 	•	--filter=web → Runs the command for the web package.
+# 	•	--filter=web... → Runs the command for web and all its dependencies (explained below).
+# 	•	--filter=!api → Exclude api package.
+# 	•	--filter=web,api → Runs for both web and api..
+RUN npx turbo build --filter=web...
+
+EXPOSE 3000
+
+CMD [ "pnpm", "start:frontend" ]

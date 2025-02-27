@@ -1,6 +1,6 @@
 
-import { ArrowRight, MessageSquare, Users2 } from 'lucide-react';
-import Link from 'next/link';
+import CreateGame from '@/components/create-game';
+import { MessageSquare, Users2 } from 'lucide-react';
 
 export default function Home() {
   return (
@@ -16,13 +16,7 @@ export default function Home() {
             Play anywhere, anytime, with real-time updates.
           </p>
           <div className="flex justify-center gap-4 pt-4">
-            <Link
-              href="/play"
-              className="inline-flex items-center px-6 py-3 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-            >
-              Start Playing
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
+            <CreateGame />
           </div>
         </div>
       </div>
