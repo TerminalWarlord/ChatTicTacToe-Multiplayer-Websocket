@@ -8,6 +8,8 @@ RUN npm install -g pnpm
 
 COPY . .
 
+RUN pnpm install --ignore-scripts
+
 # 1.	Filters (--filter or -F) – Specify which packages to build:
 # 	•	--filter=web → Runs the command for the web package.
 # 	•	--filter=web... → Runs the command for web and all its dependencies (explained below).
