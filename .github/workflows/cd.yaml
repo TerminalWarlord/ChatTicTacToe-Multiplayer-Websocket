@@ -44,6 +44,6 @@ jobs:
             fi
 
             # Run new container
-            docker run --rm -p 5001:3000 terminalwarlord/tic-tac-toe-frontend:${{ github.sha }}
+            docker -d run --rm -p 5001:3000 --name tic-tac-toe-frontend terminalwarlord/tic-tac-toe-frontend:${{ github.sha }}
           EOF
 
