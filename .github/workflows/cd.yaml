@@ -32,12 +32,18 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Login to VPS
+      - name: Login to VPS and Deploy
         run: |
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{secrets.USER}}@${{secrets.SSH_HOST}} << 'EOF'
             mkdir -p ~/${{secrets.DIRECTORY}}
             cd ~/${{secrets.DIRECTORY}}
 
-            docker stop tic-tac-toe-frontend && docker run --rm -p 5001:3000 terminalwarlord/tic-tac-toe-frontend:${{github.sha}}
+            # Remove existing container
+            if[$(docker ps -q -f name=tic-tac-toe-frontend)]; then
+              docker stop tic-tac-toe-frontend
+            fi
+
+            # Run new container
+            docker run --rm -p 5001:3000 terminalwarlord/tic-tac-toe-frontend:${{github.sha}}
           EOF
 
