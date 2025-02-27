@@ -34,16 +34,16 @@ jobs:
 
       - name: Login to VPS and Deploy
         run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{secrets.USER}}@${{secrets.SSH_HOST}} << 'EOF'
-            mkdir -p ~/${{secrets.DIRECTORY}}
-            cd ~/${{secrets.DIRECTORY}}
+          ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -o ServerAliveCountMax=5 -i ~/.ssh/id_rsa ${{ secrets.USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            mkdir -p ~/${{ secrets.DIRECTORY }}
+            cd ~/${{ secrets.DIRECTORY }}
 
             # Remove existing container
-            if[$(docker ps -q -f name=tic-tac-toe-frontend)]; then
+            if [ $(docker ps -q -f name=tic-tac-toe-frontend) ]; then
               docker stop tic-tac-toe-frontend
             fi
 
             # Run new container
-            docker run --rm -p 5001:3000 terminalwarlord/tic-tac-toe-frontend:${{github.sha}}
+            docker run --rm -p 5001:3000 terminalwarlord/tic-tac-toe-frontend:${{ github.sha }}
           EOF
 
