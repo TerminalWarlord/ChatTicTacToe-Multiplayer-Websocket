@@ -48,8 +48,12 @@ jobs:
             mkdir -p ~/${{ secrets.DIRECTORY }}
             cd ~/${{ secrets.DIRECTORY }}
 
-            # Pull the latest changes if this is a git repository
-            # git pull
+
+            if [ -d .git ]; then
+              git pull origin HEAD
+            else
+              git clone https://github.com/${{ github.repository }} .
+            fi
 
             # Restart with docker-compose
             docker compose down
