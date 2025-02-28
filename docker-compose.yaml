@@ -6,7 +6,7 @@ services:
     image: terminalwarlord/tic-tac-toe-frontend:latest
     pull_policy: always
     ports:
-      - "3000"
+      - "5001:3000"
     
   
   websocket:
@@ -16,13 +16,13 @@ services:
     image: terminalwarlord/tic-tac-toe-ws:latest
     pull_policy: always
     ports:
-      - "8080"
+      - "8080:8080"
     
   nginx:
       image: nginx:latest
       ports:
-        - "5001:80"
-        - "8080:443"
+        - "5002:80"
+        - "8081:443"
       volumes:
         - ./nginx/conf:/etc/nginx/conf.d
         - ./certbot/www:/var/www/certbot
