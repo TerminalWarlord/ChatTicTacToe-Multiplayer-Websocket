@@ -25,7 +25,7 @@ const GameUI: React.FC<{ gameId: string, playerId: string }> = ({ gameId, player
     }
 
     useEffect(() => {
-        const ws = new WebSocket("ws://tictactoe.joybiswas.com/game/");
+        const ws = new WebSocket("wss://tictactoe.joybiswas.com/game/");
         setSocket(ws);
     }, []);
 
