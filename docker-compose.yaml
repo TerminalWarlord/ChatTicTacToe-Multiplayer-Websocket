@@ -1,36 +1,37 @@
 services:
   web:
-    build: 
-      context: .
-      dockerfile: ./docker/Dockerfile.frontend
+    # build: 
+    #   context: .
+    #   dockerfile: ./docker/Dockerfile.frontend
+    image: terminalwarlord/tic-tac-toe-frontend:latest
     ports:
       - "5001:3000"
     
   
   websocket:
-    build:
-      context: .
-      dockerfile: ./docker/Dockerfile.ws
+    # build:
+    #   context: .
+    #   dockerfile: ./docker/Dockerfile.ws
+    image: terminalwarlord/tic-tac-toe-ws:latest
     ports:
       - "8080:8080"
-  
-
-  nginx:
-    image: "nginx:latest"
-    ports:
-      - "80:80"
-      - "443:443"
     
-    volumes:
-      - "./nginx/conf.d:/etc/nginx/conf.d"
-      - "./certbot/www:/var/www/letsencrypt"
-      - "./certbot/conf:/etc/letsencrypt"
-    depends_on:
-      - web
-      - websocket
+  nginx:
+      image: nginx:latest
+      ports:
+        - "80:80"
+        - "443:443"
+      volumes:
+        - ./nginx/conf:/etc/nginx/conf.d
+        - ./certbot/www:/var/www/certbot
+        - ./certbot/conf:/etc/letsencrypt
+      depends_on:
+        - web
+        - websocket
+
   certbot:
     image: certbot/certbot
     volumes:
-      - "./certbot/conf:/etc/letsencrypt"
-      - "./certbot/www:/var/www/certbot"
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+      - ./certbot/www:/var/www/certbot
+      - ./certbot/conf:/etc/letsencrypt
+    command: renew

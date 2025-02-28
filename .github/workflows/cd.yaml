@@ -17,13 +17,21 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push to Dockerhub
+      - name: Build and push Frontend to Dockerhub
         uses: docker/build-push-action@v6
         with:
           context: .
           file: ./docker/Dockerfile.frontend
           push: true
-          tags: terminalwarlord/tic-tac-toe-frontend:${{github.sha}}
+          tags: terminalwarlord/tic-tac-toe-frontend:latest
+      
+      - name: Build and push Websocket to Dockerhub
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./docker/Dockerfile.ws
+          push: true
+          tags: terminalwarlord/tic-tac-toe-ws:latest
 
       - name: Setup SSH Key
         run: |
@@ -40,12 +48,17 @@ jobs:
             mkdir -p ~/${{ secrets.DIRECTORY }}
             cd ~/${{ secrets.DIRECTORY }}
 
-            # Remove existing container
-            if [ $(docker ps -q -f name=tic-tac-toe-frontend) ]; then
-              docker stop tic-tac-toe-frontend
-            fi
 
-            # Run new container
-            docker run --rm -d -p 5001:3000 --name tic-tac-toe-frontend terminalwarlord/tic-tac-toe-frontend:${{ github.sha }}
+            # # Remove existing container
+            # if [ $(docker ps -q -f name=tic-tac-toe-frontend) ]; then
+            #   docker stop tic-tac-toe-frontend
+            # fi
+
+            # # Run new container
+            # docker run --rm -d -p 5001:3000 --name tic-tac-toe-frontend terminalwarlord/tic-tac-toe-frontend:latest
+            # #${{ github.sha }}
+
+            docker-compose down
+            docker-compose up -d --build
           EOF
 
