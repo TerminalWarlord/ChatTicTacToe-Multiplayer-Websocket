@@ -4,8 +4,9 @@ services:
     #   context: .
     #   dockerfile: ./docker/Dockerfile.frontend
     image: terminalwarlord/tic-tac-toe-frontend:latest
+    pull_policy: always
     ports:
-      - "5001:3000"
+      - "3000"
     
   
   websocket:
@@ -13,25 +14,26 @@ services:
     #   context: .
     #   dockerfile: ./docker/Dockerfile.ws
     image: terminalwarlord/tic-tac-toe-ws:latest
+    pull_policy: always
     ports:
-      - "8080:8080"
+      - "8080"
     
-  # nginx:
-  #     image: nginx:latest
-  #     ports:
-  #       - "5001:80"
-  #       - "8080:443"
-  #     volumes:
-  #       - ./nginx/conf:/etc/nginx/conf.d
-  #       - ./certbot/www:/var/www/certbot
-  #       - ./certbot/conf:/etc/letsencrypt
-  #     depends_on:
-  #       - web
-  #       - websocket
+  nginx:
+      image: nginx:latest
+      ports:
+        - "5001:80"
+        - "8080:443"
+      volumes:
+        - ./nginx/conf:/etc/nginx/conf.d
+        - ./certbot/www:/var/www/certbot
+        - ./certbot/conf:/etc/letsencrypt
+      depends_on:
+        - web
+        - websocket
 
-  # certbot:
-  #   image: certbot/certbot
-  #   volumes:
-  #     - ./certbot/www:/var/www/certbot
-  #     - ./certbot/conf:/etc/letsencrypt
-  #   command: renew
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./certbot/www:/var/www/certbot
+      - ./certbot/conf:/etc/letsencrypt
+    command: renew
