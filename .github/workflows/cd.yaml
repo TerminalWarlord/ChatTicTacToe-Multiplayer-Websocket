@@ -48,17 +48,15 @@ jobs:
             mkdir -p ~/${{ secrets.DIRECTORY }}
             cd ~/${{ secrets.DIRECTORY }}
 
+            # Pull the latest changes if this is a git repository
+            # git pull
 
-            # # Remove existing container
-            # if [ $(docker ps -q -f name=tic-tac-toe-frontend) ]; then
-            #   docker stop tic-tac-toe-frontend
-            # fi
-
-            # # Run new container
-            # docker run --rm -d -p 5001:3000 --name tic-tac-toe-frontend terminalwarlord/tic-tac-toe-frontend:latest
-            # #${{ github.sha }}
-
+            # Restart with docker-compose
             docker compose down
             docker compose up -d --build
-          EOF
 
+            # Apply Nginx configuration
+            sudo cp nginx/conf/default.conf /etc/nginx/sites-enabled/tictactoe 
+            sudo nginx -t
+            sudo systemctl restart nginx
+          EOF
